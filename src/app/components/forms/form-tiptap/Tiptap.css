@@ -1,0 +1,75 @@
+.MuiTiptap-FieldContainer-root {
+  min-height: 300px;
+}
+
+.MuiTiptap-RichTextField-root {
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
+}
+
+.MuiTiptap-RichTextField-root:hover {
+  border-color: rgba(0, 0, 0, 0.87);
+}
+
+.MuiTiptap-RichTextField-root:focus-within {
+  border-color: #5d87ff;
+  border-width: 2px;
+}
+
+.MuiTiptap-MenuBar-root {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 4px 8px;
+  background-color: #f5f5f5;
+}
+
+.ProseMirror {
+  padding: 12px;
+  min-height: 250px;
+  outline: none;
+}
+
+.ProseMirror p {
+  margin: 0 0 8px 0;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  margin: 16px 0 8px 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 24px;
+  margin: 8px 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid #ccc;
+  margin: 8px 0;
+  padding-left: 12px;
+  color: #666;
+}
+
+.ProseMirror code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+.ProseMirror pre {
+  background-color: #f4f4f4;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 16px 0;
+}
