@@ -36,13 +36,16 @@ import { dokumenAPI } from '@/services/api';
 interface Dokumen {
   id: number;
   nama: string;
-  kategori: string;
-  deskripsi: string;
+  kategori: string | null;
+  deskripsi: string | null;
   file_path: string;
-  file_type: string;
-  file_size: number;
+  file_type: string | null;
+  file_size: number | null;
   is_public: boolean;
-  uploader: { id: number; name: string };
+  uploaded_by?: number;
+  uploader: { id: number; name: string } | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface PaginationMeta {
@@ -162,14 +165,14 @@ export default function DokumenPage() {
       setEditingId(data.id);
       setFormData({
         nama: data.nama,
-        kategori: data.kategori,
+        kategori: data.kategori || '',
         deskripsi: data.deskripsi || '',
         is_public: data.is_public,
       });
       setExistingFile({
         path: data.file_path,
-        type: data.file_type,
-        size: data.file_size,
+        type: data.file_type || '',
+        size: data.file_size || 0,
       });
     } else {
       setEditingId(null);
@@ -385,8 +388,8 @@ export default function DokumenPage() {
                             {item.nama}
                           </Typography>
                         </TableCell>
-                        <TableCell>{item.kategori}</TableCell>
-                        <TableCell>{formatFileSize(item.file_size)}</TableCell>
+                        <TableCell>{item.kategori || '-'}</TableCell>
+                        <TableCell>{formatFileSize(item.file_size || 0)}</TableCell>
                         <TableCell>
                           <Chip
                             label={item.is_public ? 'Publik' : 'Privat'}

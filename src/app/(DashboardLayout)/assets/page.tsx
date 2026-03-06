@@ -40,10 +40,12 @@ interface Asset {
   nama: string;
   kategori: string;
   kondisi: string;
-  deskripsi: string;
+  deskripsi: string | null;
   foto: string | null;
   jumlah: number;
-  tanggal_perolehan: string;
+  tanggal_perolehan: string | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface PaginationMeta {

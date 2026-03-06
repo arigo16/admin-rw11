@@ -44,12 +44,15 @@ interface Berita {
   judul: string;
   slug: string;
   konten: string;
-  ringkasan: string;
+  ringkasan: string | null;
   thumbnail: string | null;
-  kategori: string;
+  kategori: string | null;
+  author_id?: number;
   is_published: boolean;
   published_at: string | null;
-  author: { id: number; name: string };
+  author: { id: number; name: string } | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface PaginationMeta {
@@ -164,7 +167,7 @@ export default function BeritaPage() {
         judul: data.judul,
         konten: data.konten,
         ringkasan: data.ringkasan || '',
-        kategori: data.kategori,
+        kategori: data.kategori || '',
         is_published: data.is_published,
       });
       setThumbnailPreview(data.thumbnail || null);

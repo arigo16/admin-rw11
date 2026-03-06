@@ -37,8 +37,8 @@ interface Pengurus {
   id: number;
   nama: string;
   jabatan: string;
-  bidang: string;
-  periode: string;
+  bidang: string | null;
+  periode: string | null;
   sequence: number;
   foto: string | null;
   is_active: boolean;
@@ -165,9 +165,9 @@ export default function PengurusPage() {
       setFormData({
         nama: data.nama,
         jabatan: data.jabatan,
-        bidang: data.bidang,
-        periode: data.periode,
-        sequence: data.sequence,
+        bidang: data.bidang || '',
+        periode: data.periode || '',
+        sequence: String(data.sequence),
         is_active: data.is_active,
       });
     } else {

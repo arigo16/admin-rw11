@@ -17,26 +17,27 @@ import { IconDeviceFloppy } from '@tabler/icons-react';
 import { rwInfoAPI } from '@/services/api';
 
 interface RWInfo {
-  name: string;
-  fullName: string;
-  desa: string;
-  kecamatan: string;
-  kabupaten: string;
-  provinsi: string;
-  alamat: string;
-  telepon: string;
-  whatsapp: string;
-  email: string;
-  googleMapsEmbed: string;
-  socialMedia: {
-    facebook: string;
-    instagram: string;
-    youtube: string;
+  name?: string;
+  fullName?: string;
+  desa?: string;
+  kecamatan?: string;
+  kabupaten?: string;
+  provinsi?: string;
+  alamat?: string;
+  telepon?: string;
+  whatsapp?: string;
+  email?: string;
+  googleMapsEmbed?: string;
+  socialMedia?: {
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
   };
-  about: string;
-  visi: string;
-  misi: string[];
-  sambutanKetuaRW: string;
+  about?: string;
+  visi?: string;
+  misi?: string[];
+  sambutanKetuaRW?: string;
+  [key: string]: string | string[] | object | undefined;
 }
 
 export default function InfoRWPage() {
@@ -140,7 +141,7 @@ export default function InfoRWPage() {
                   id="name"
                   placeholder="Masukkan nama RW"
                   fullWidth
-                  value={info.name}
+                  value={info.name || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, name: e.target.value })}
                 />
               </Grid>
@@ -150,7 +151,7 @@ export default function InfoRWPage() {
                   id="fullName"
                   placeholder="Masukkan nama lengkap"
                   fullWidth
-                  value={info.fullName}
+                  value={info.fullName || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, fullName: e.target.value })}
                 />
               </Grid>
@@ -160,7 +161,7 @@ export default function InfoRWPage() {
                   id="desa"
                   placeholder="Masukkan nama desa"
                   fullWidth
-                  value={info.desa}
+                  value={info.desa || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, desa: e.target.value })}
                 />
               </Grid>
@@ -170,7 +171,7 @@ export default function InfoRWPage() {
                   id="kecamatan"
                   placeholder="Masukkan nama kecamatan"
                   fullWidth
-                  value={info.kecamatan}
+                  value={info.kecamatan || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, kecamatan: e.target.value })}
                 />
               </Grid>
@@ -180,7 +181,7 @@ export default function InfoRWPage() {
                   id="kabupaten"
                   placeholder="Masukkan nama kabupaten"
                   fullWidth
-                  value={info.kabupaten}
+                  value={info.kabupaten || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, kabupaten: e.target.value })}
                 />
               </Grid>
@@ -190,7 +191,7 @@ export default function InfoRWPage() {
                   id="provinsi"
                   placeholder="Masukkan nama provinsi"
                   fullWidth
-                  value={info.provinsi}
+                  value={info.provinsi || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, provinsi: e.target.value })}
                 />
               </Grid>
@@ -202,7 +203,7 @@ export default function InfoRWPage() {
                   fullWidth
                   multiline
                   rows={2}
-                  value={info.alamat}
+                  value={info.alamat || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, alamat: e.target.value })}
                 />
               </Grid>
@@ -219,7 +220,7 @@ export default function InfoRWPage() {
                   id="telepon"
                   placeholder="Masukkan nomor telepon"
                   fullWidth
-                  value={info.telepon}
+                  value={info.telepon || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, telepon: e.target.value })}
                 />
               </Grid>
@@ -229,7 +230,7 @@ export default function InfoRWPage() {
                   id="whatsapp"
                   placeholder="Masukkan nomor WhatsApp"
                   fullWidth
-                  value={info.whatsapp}
+                  value={info.whatsapp || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, whatsapp: e.target.value })}
                 />
               </Grid>
@@ -239,7 +240,7 @@ export default function InfoRWPage() {
                   id="email"
                   placeholder="Masukkan alamat email"
                   fullWidth
-                  value={info.email}
+                  value={info.email || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, email: e.target.value })}
                 />
               </Grid>
@@ -310,7 +311,7 @@ export default function InfoRWPage() {
                   fullWidth
                   multiline
                   rows={3}
-                  value={info.about}
+                  value={info.about || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, about: e.target.value })}
                 />
               </Grid>
@@ -322,7 +323,7 @@ export default function InfoRWPage() {
                   fullWidth
                   multiline
                   rows={2}
-                  value={info.visi}
+                  value={info.visi || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, visi: e.target.value })}
                 />
               </Grid>
@@ -353,7 +354,7 @@ export default function InfoRWPage() {
                   fullWidth
                   multiline
                   rows={5}
-                  value={info.sambutanKetuaRW}
+                  value={info.sambutanKetuaRW || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, sambutanKetuaRW: e.target.value })}
                 />
               </Grid>
@@ -364,7 +365,7 @@ export default function InfoRWPage() {
                   id="googleMapsEmbed"
                   placeholder="URL embed dari Google Maps"
                   fullWidth
-                  value={info.googleMapsEmbed}
+                  value={info.googleMapsEmbed || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInfo({ ...info, googleMapsEmbed: e.target.value })}
                 />
               </Grid>

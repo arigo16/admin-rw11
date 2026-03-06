@@ -36,9 +36,9 @@ interface GalleryPhoto {
 interface GalleryEvent {
   id: number;
   nama_event: string;
-  deskripsi: string;
-  tanggal_event: string;
-  lokasi: string;
+  deskripsi: string | null;
+  tanggal_event: string | null;
+  lokasi: string | null;
   photos: GalleryPhoto[];
 }
 
