@@ -57,11 +57,8 @@ export default function NavItem({ item, level, pathDirect, hideMenu, onClick }: 
     marginBottom: '2px',
     padding: '8px 10px',
     borderRadius: `${isBorderRadius}px`,
-    backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
-    color:
-      level > 1 && pathDirect === item?.href
-        ? `${theme.palette.primary.main}!important`
-        : theme.palette.text.secondary,
+    backgroundColor: 'transparent',
+    color: theme.palette.text.secondary,
     paddingLeft: hideMenu ? '10px' : level > 2 ? `${level * 15}px` : '10px',
     '&:hover': {
       backgroundColor: theme.palette.primary.light,
@@ -91,10 +88,7 @@ export default function NavItem({ item, level, pathDirect, hideMenu, onClick }: 
               sx={{
                 minWidth: '36px',
                 p: '3px 0',
-                color:
-                  level > 1 && pathDirect === item?.href
-                    ? `${theme.palette.primary.main}!important`
-                    : 'inherit',
+                color: 'inherit',
               }}
             >
               {itemIcon}

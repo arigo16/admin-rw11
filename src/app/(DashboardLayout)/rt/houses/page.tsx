@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -15,10 +16,18 @@ import TablePagination from '@mui/material/TablePagination';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
+import InputAdornment from '@mui/material/InputAdornment';
 import PageContainer from '@/app/components/container/PageContainer';
 import { useOrg } from '@/app/context/orgContext';
 import { useSnackbar } from '@/app/context/snackbarContext';
 import { createRtAPI, RtHouse } from '@/services/api';
+import CustomTextField from '@/app/components/forms/theme-elements/CustomTextField';
+import CustomSelect from '@/app/components/forms/theme-elements/CustomSelect';
+import { IconSearch, IconRefresh, IconFilter, IconDotsVertical, IconEye } from '@tabler/icons-react';
 
 interface PaginationMeta {
   current_page: number;
@@ -28,10 +37,31 @@ interface PaginationMeta {
 }
 
 export default function RtHousesPage() {
+  const router = useRouter();
   const { rtId, orgLabel } = useOrg();
   const { showError } = useSnackbar();
   const [houses, setHouses] = useState<RtHouse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Filter state
+  const [search, setSearch] = useState('');
+  const [filterOccupied, setFilterOccupied] = useState('');
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+
+  // Action menu state
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [menuHouseId, setMenuHouseId] = useState<number | null>(null);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, houseId: number) => {
+    setAnchorEl(event.currentTarget);
+    setMenuHouseId(houseId);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setMenuHouseId(null);
+  };
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
@@ -40,17 +70,21 @@ export default function RtHousesPage() {
     if (rtId) {
       fetchHouses();
     }
-  }, [rtId, page, rowsPerPage]);
+  }, [rtId, page, rowsPerPage, search, filterOccupied]);
 
   const fetchHouses = async () => {
     if (!rtId) return;
     setIsLoading(true);
     try {
       const rtAPI = createRtAPI(rtId);
-      const response = await rtAPI.getHouses({
+      const params: any = {
         page: page + 1,
         per_page: rowsPerPage,
-      });
+      };
+      if (search) params.search = search;
+      if (filterOccupied !== '') params.occupied = filterOccupied;
+
+      const response = await rtAPI.getHouses(params);
       setHouses(response.data.data || []);
       if (response.data.meta) {
         setMeta(response.data.meta);
@@ -62,11 +96,36 @@ export default function RtHousesPage() {
     }
   };
 
+  const handleRefresh = () => {
+    fetchHouses();
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
+
+  const handleFilterOccupiedChange = (value: string) => {
+    setFilterOccupied(value);
+    setPage(0);
+  };
+
   if (!rtId) {
     return (
       <PageContainer title="Data Rumah" description="">
         <Box mt={3}>
-          <Alert severity="warning">Silakan pilih RT dari dropdown di sidebar.</Alert>
+          <Card>
+            <CardContent>
+              <Skeleton variant="text" width={200} height={32} sx={{ mb: 3 }} />
+              <Box display="flex" gap={2} mb={3}>
+                <Skeleton variant="rounded" width={300} height={40} />
+                <Skeleton variant="rounded" width={150} height={40} />
+              </Box>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} variant="text" height={50} sx={{ mb: 1 }} />
+              ))}
+            </CardContent>
+          </Card>
         </Box>
       </PageContainer>
     );
@@ -81,6 +140,56 @@ export default function RtHousesPage() {
               Data Rumah {orgLabel}
             </Typography>
 
+            {/* Filter Section */}
+            <Box display="flex" gap={2} mb={3} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<IconFilter size={18} />}
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              >
+                Filter
+              </Button>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={Boolean(filterAnchorEl)}
+                onClose={() => setFilterAnchorEl(null)}
+                slotProps={{ paper: { sx: { p: 2, minWidth: 280 } } }}
+              >
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomTextField
+                    placeholder="Cari pemilik/penghuni/blok..."
+                    value={search}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconSearch size={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <CustomSelect
+                    value={filterOccupied}
+                    onChange={(e: any) => handleFilterOccupiedChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                  >
+                    <MenuItem value="">Semua Status</MenuItem>
+                    <MenuItem value="1">Terisi</MenuItem>
+                    <MenuItem value="0">Kosong</MenuItem>
+                  </CustomSelect>
+                </Box>
+              </Menu>
+              <Box flexGrow={1} />
+              <Button
+                variant="outlined"
+                startIcon={<IconRefresh size={18} />}
+                onClick={handleRefresh}
+              >
+                Refresh
+              </Button>
+            </Box>
+
             <TableContainer>
               <Table>
                 <TableHead>
@@ -89,22 +198,21 @@ export default function RtHousesPage() {
                     <TableCell>Pemilik</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>IPL</TableCell>
-                    <TableCell>Kas</TableCell>
-                    <TableCell>PKK</TableCell>
+                    <TableCell align="center" sx={{ width: 50 }}>Aksi</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {isLoading ? (
                     [...Array(5)].map((_, i) => (
                       <TableRow key={i}>
-                        {[...Array(6)].map((_, j) => (
+                        {[...Array(5)].map((_, j) => (
                           <TableCell key={j}><Skeleton /></TableCell>
                         ))}
                       </TableRow>
                     ))
                   ) : houses.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} align="center">Belum ada data rumah</TableCell>
+                      <TableCell colSpan={5} align="center">Belum ada data rumah</TableCell>
                     </TableRow>
                   ) : (
                     houses.map((house) => (
@@ -125,19 +233,10 @@ export default function RtHousesPage() {
                             </Typography>
                           ) : '-'}
                         </TableCell>
-                        <TableCell>
-                          {house.pay_cash ? (
-                            <Typography variant="body2">
-                              Rp {house.cash_amount?.toLocaleString('id-ID')}
-                            </Typography>
-                          ) : '-'}
-                        </TableCell>
-                        <TableCell>
-                          {house.pay_pkk ? (
-                            <Typography variant="body2">
-                              Rp {house.pkk_amount?.toLocaleString('id-ID')}
-                            </Typography>
-                          ) : '-'}
+                        <TableCell align="center" sx={{ width: 50 }}>
+                          <IconButton onClick={(e) => handleMenuOpen(e, house.id)}>
+                            <IconDotsVertical size={18} />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))
@@ -161,6 +260,25 @@ export default function RtHousesPage() {
             />
           </CardContent>
         </Card>
+
+        {/* Action Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <MenuItem
+            onClick={() => {
+              router.push(`/rt/houses/${menuHouseId}`);
+              handleMenuClose();
+            }}
+          >
+            <IconEye size={18} style={{ marginRight: 8 }} />
+            Lihat Detail
+          </MenuItem>
+        </Menu>
       </Box>
     </PageContainer>
   );

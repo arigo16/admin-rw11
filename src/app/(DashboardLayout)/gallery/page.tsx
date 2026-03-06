@@ -27,7 +27,8 @@ import PageContainer from '@/app/components/container/PageContainer';
 import { useSnackbar } from '@/app/context/snackbarContext';
 import CustomTextField from '@/app/components/forms/theme-elements/CustomTextField';
 import CustomFormLabel from '@/app/components/forms/theme-elements/CustomFormLabel';
-import { IconPlus, IconEdit, IconTrash, IconPhoto, IconDotsVertical } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconTrash, IconPhoto, IconDotsVertical, IconSearch, IconRefresh, IconFilter } from '@tabler/icons-react';
+import InputAdornment from '@mui/material/InputAdornment';
 import { galleryAPI } from '@/services/api';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -66,6 +67,9 @@ export default function GalleryPage() {
   const [events, setEvents] = useState<GalleryEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Filter state
+  const [search, setSearch] = useState('');
+
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -89,6 +93,7 @@ export default function GalleryPage() {
   // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuEventId, setMenuEventId] = useState<number | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, eventId: number) => {
     setAnchorEl(event.currentTarget);
@@ -102,15 +107,18 @@ export default function GalleryPage() {
 
   useEffect(() => {
     fetchEvents();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, search]);
 
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
-      const response = await galleryAPI.getAll({
+      const params: any = {
         page: page + 1,
         per_page: rowsPerPage,
-      });
+      };
+      if (search) params.search = search;
+
+      const response = await galleryAPI.getAll(params);
       setEvents(response.data.data || []);
       if (response.data.meta) {
         setMeta(response.data.meta);
@@ -120,6 +128,15 @@ export default function GalleryPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchEvents();
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -212,6 +229,47 @@ export default function GalleryPage() {
                 onClick={() => handleOpenDialog()}
               >
                 Tambah Event
+              </Button>
+            </Box>
+
+            {/* Filter Section */}
+            <Box display="flex" gap={2} mb={3} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<IconFilter size={18} />}
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              >
+                Filter
+              </Button>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={Boolean(filterAnchorEl)}
+                onClose={() => setFilterAnchorEl(null)}
+                slotProps={{ paper: { sx: { p: 2, minWidth: 280 } } }}
+              >
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomTextField
+                    placeholder="Cari nama event..."
+                    value={search}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconSearch size={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Box>
+              </Menu>
+              <Box flexGrow={1} />
+              <Button
+                variant="outlined"
+                startIcon={<IconRefresh size={18} />}
+                onClick={handleRefresh}
+              >
+                Refresh
               </Button>
             </Box>
 

@@ -142,6 +142,53 @@ export interface Dokumen {
 
 // ============ RT Types ============
 
+// Religion enum
+export const RELIGIONS = [
+  'ISLAM',
+  'KRISTEN',
+  'KATHOLIK',
+  'BUDDHA',
+  'HINDU',
+  'KHONGHUCU'
+] as const;
+export type Religion = typeof RELIGIONS[number];
+
+// Relatives enum
+export const RELATIVES = [
+  'Ibu',
+  'Ayah',
+  'Anak',
+  'Istri',
+  'Suami',
+  'Kakek',
+  'Nenek',
+  'Cucu',
+  'Paman',
+  'Bibi',
+  'Saudara Kandung',
+  'Saudara Tiri',
+  'Lainnya'
+] as const;
+export type Relatives = typeof RELATIVES[number];
+
+// Family Status enum
+export const FAMILY_STATUS = [
+  { value: 'TK', label: 'Belum Kawin' },
+  { value: 'K0', label: 'Kawin' },
+  { value: 'K1', label: 'Kawin Anak 1' },
+  { value: 'K2', label: 'Kawin Anak 2' },
+  { value: 'K3', label: 'Kawin Anak 3' },
+  { value: 'K4', label: 'Kawin Anak 4' },
+  { value: 'K5', label: 'Kawin Anak 5' },
+  { value: 'TK0', label: 'Bercerai' },
+  { value: 'TK1', label: 'Bercerai Anak 1' },
+  { value: 'TK2', label: 'Bercerai Anak 2' },
+  { value: 'TK3', label: 'Bercerai Anak 3' },
+  { value: 'TK4', label: 'Bercerai Anak 4' },
+  { value: 'TK5', label: 'Bercerai Anak 5' },
+] as const;
+export type FamilyStatus = typeof FAMILY_STATUS[number]['value'];
+
 // RT Owner/Occupant
 export interface RtResident {
   id: number;
@@ -150,6 +197,18 @@ export interface RtResident {
   kk: string | null;
   sum_family: string | null;
   religion: string | null;
+}
+
+// RT Member (family member)
+export interface RtMember {
+  id: number;
+  house_id: number;
+  name: string;
+  kk: string | null;
+  handphone: string | null;
+  religion: string | null;
+  relatives: string | null;
+  is_domicile: boolean;
 }
 
 // RT House
@@ -161,13 +220,31 @@ export interface RtHouse {
   occupied: boolean;
   occupied_by_owner: boolean;
   pay_ipl: boolean;
-  ipl_amount: number;
+  ipl_amount: number | null;
   pay_cash: boolean;
-  cash_amount: number;
+  cash_amount: number | null;
   pay_pkk: boolean;
-  pkk_amount: number;
+  pkk_amount: number | null;
   owner: RtResident | null;
   occupant: RtResident | null;
+}
+
+// RT House Detail (includes bills and members)
+export interface RtHouseDetail extends RtHouse {
+  bills_ipl: RtBillSummary[];
+  bills_cash: RtBillSummary[];
+  bills_pkk: RtBillSummary[];
+  members: RtMember[];
+}
+
+// RT Bill Summary (for house detail)
+export interface RtBillSummary {
+  id: number;
+  year_bill: number;
+  month_bill: number;
+  amount: number;
+  status: 'UNPAID' | 'PENDING' | 'PAID';
+  deleted_at: string | null;
 }
 
 // RT Bill
@@ -345,6 +422,8 @@ api.interceptors.response.use(
         if (!isLoginPage) {
           localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
           removeSecureItem(STORAGE_KEYS.USER);
+          // Remove auth cookie
+          document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
           window.location.href = '/auth/login';
         }
       }
@@ -537,13 +616,38 @@ export const createRtAPI = (rtNumber: number) => ({
     occupied?: 0 | 1;
     search?: string;
   }) => api.get<PaginatedResponse<RtHouse>>(`/rt/${rtNumber}/houses`, { params }),
-  getHouseById: (id: number) => api.get<ApiResponse<RtHouse>>(`/rt/${rtNumber}/houses/${id}`),
+  getHouseById: (id: number) => api.get<ApiResponse<RtHouseDetail>>(`/rt/${rtNumber}/houses/${id}`),
   getHouseBills: (id: number) => api.get<ApiResponse<{
     house: { id: number; address: string };
     ipl: { unpaid_count: number; unpaid_total: number; bills: RtBill[] };
     cash: { unpaid_count: number; unpaid_total: number; bills: RtBill[] };
     pkk: { unpaid_count: number; unpaid_total: number; bills: RtBill[] };
   }>>(`/rt/${rtNumber}/houses/${id}/bills`),
+  updateHouse: (id: number, data: {
+    block?: string;
+    no?: number;
+    occupied?: boolean;
+    occupied_by_owner?: boolean;
+    pay_ipl?: boolean;
+    ipl_amount?: number | null;
+    pay_cash?: boolean;
+    cash_amount?: number | null;
+    pay_pkk?: boolean;
+    pkk_amount?: number | null;
+  }) => api.put<ApiResponse<RtHouseDetail>>(`/rt/${rtNumber}/houses/${id}`, data),
+  updateHouseBillsBulk: (houseId: number, data: {
+    ipl?: Array<{ id: number; amount?: number; delete?: boolean; restore?: boolean }>;
+    cash?: Array<{ id: number; amount?: number; delete?: boolean; restore?: boolean }>;
+    pkk?: Array<{ id: number; amount?: number; delete?: boolean; restore?: boolean }>;
+  }) => api.put<ApiResponse<{
+    house: { id: number; address: string };
+    updated: { ipl: number; cash: number; pkk: number };
+    bills: {
+      ipl: Array<{ id: number; amount: number; deleted_at: string | null }>;
+      cash: Array<{ id: number; amount: number; deleted_at: string | null }>;
+      pkk: Array<{ id: number; amount: number; deleted_at: string | null }>;
+    };
+  }>>(`/rt/${rtNumber}/houses/${houseId}/bills/bulk`, data),
 
   // Bills
   getBillsIPL: (params?: {
@@ -615,4 +719,42 @@ export const createRtAPI = (rtNumber: number) => ({
   }) => api.get<PaginatedResponse<RtSuggestion>>(`/rt/${rtNumber}/suggestions`, { params }),
   markSuggestionRead: (id: number) =>
     api.post<ApiResponse<RtSuggestion>>(`/rt/${rtNumber}/suggestions/${id}/read`),
+
+  // House Owner
+  getHouseOwner: (houseId: number) =>
+    api.get<ApiResponse<{ house: { id: number; address: string }; owner: RtResident | null }>>(`/rt/${rtNumber}/houses/${houseId}/owner`),
+  createOrUpdateOwner: (houseId: number, data: FormData) =>
+    api.post<ApiResponse<RtResident>>(`/rt/${rtNumber}/houses/${houseId}/owner`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  deleteOwner: (houseId: number) =>
+    api.delete<ApiResponse<null>>(`/rt/${rtNumber}/houses/${houseId}/owner`),
+
+  // House Occupant
+  getHouseOccupant: (houseId: number) =>
+    api.get<ApiResponse<{ house: { id: number; address: string }; occupant: RtResident | null }>>(`/rt/${rtNumber}/houses/${houseId}/occupant`),
+  createOrUpdateOccupant: (houseId: number, data: FormData) =>
+    api.post<ApiResponse<RtResident>>(`/rt/${rtNumber}/houses/${houseId}/occupant`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  deleteOccupant: (houseId: number) =>
+    api.delete<ApiResponse<null>>(`/rt/${rtNumber}/houses/${houseId}/occupant`),
+
+  // House Members
+  getHouseMembers: (houseId: number) =>
+    api.get<ApiResponse<{ house: { id: number; address: string }; members: RtMember[] }>>(`/rt/${rtNumber}/houses/${houseId}/members`),
+  getMemberById: (houseId: number, memberId: number) =>
+    api.get<ApiResponse<RtMember>>(`/rt/${rtNumber}/houses/${houseId}/members/${memberId}`),
+  createMember: (houseId: number, data: FormData) =>
+    api.post<ApiResponse<RtMember>>(`/rt/${rtNumber}/houses/${houseId}/members`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  updateMember: (houseId: number, memberId: number, data: FormData) =>
+    api.post<ApiResponse<RtMember>>(`/rt/${rtNumber}/houses/${houseId}/members/${memberId}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  deleteMember: (houseId: number, memberId: number) =>
+    api.delete<ApiResponse<null>>(`/rt/${rtNumber}/houses/${houseId}/members/${memberId}`),
+  copyMemberFrom: (houseId: number, data: { source: 'owner' | 'occupant'; is_domicile: boolean; relatives: string }) =>
+    api.post<ApiResponse<RtMember>>(`/rt/${rtNumber}/houses/${houseId}/members/copy-from`, data),
 });

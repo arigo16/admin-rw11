@@ -29,7 +29,8 @@ import CustomSelect from '@/app/components/forms/theme-elements/CustomSelect';
 import CustomSwitch from '@/app/components/forms/theme-elements/CustomSwitch';
 import CustomFormLabel from '@/app/components/forms/theme-elements/CustomFormLabel';
 import Menu from '@mui/material/Menu';
-import { IconPlus, IconEdit, IconTrash, IconLock, IconLockOpen, IconDotsVertical, IconUpload, IconFile } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconTrash, IconLock, IconLockOpen, IconDotsVertical, IconUpload, IconFile, IconSearch, IconRefresh, IconFilter } from '@tabler/icons-react';
+import InputAdornment from '@mui/material/InputAdornment';
 import { dokumenAPI } from '@/services/api';
 
 interface Dokumen {
@@ -60,6 +61,11 @@ export default function DokumenPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { showError, showSuccess } = useSnackbar();
 
+  // Filter state
+  const [search, setSearch] = useState('');
+  const [filterKategori, setFilterKategori] = useState('');
+  const [filterPublic, setFilterPublic] = useState('');
+
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -84,6 +90,7 @@ export default function DokumenPage() {
   // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuItemId, setMenuItemId] = useState<number | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setAnchorEl(event.currentTarget);
@@ -97,15 +104,20 @@ export default function DokumenPage() {
 
   useEffect(() => {
     fetchDokumen();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, search, filterKategori, filterPublic]);
 
   const fetchDokumen = async () => {
     setIsLoading(true);
     try {
-      const response = await dokumenAPI.getAll({
+      const params: any = {
         page: page + 1,
         per_page: rowsPerPage,
-      });
+      };
+      if (search) params.search = search;
+      if (filterKategori) params.kategori = filterKategori;
+      if (filterPublic !== '') params.is_public = filterPublic;
+
+      const response = await dokumenAPI.getAll(params);
       setDokumen(response.data.data || []);
       if (response.data.meta) {
         setMeta(response.data.meta);
@@ -115,6 +127,25 @@ export default function DokumenPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchDokumen();
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
+
+  const handleFilterKategoriChange = (value: string) => {
+    setFilterKategori(value);
+    setPage(0);
+  };
+
+  const handleFilterPublicChange = (value: string) => {
+    setFilterPublic(value);
+    setPage(0);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -251,6 +282,70 @@ export default function DokumenPage() {
                 onClick={() => handleOpenDialog()}
               >
                 Tambah Dokumen
+              </Button>
+            </Box>
+
+            {/* Filter Section */}
+            <Box display="flex" gap={2} mb={3} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<IconFilter size={18} />}
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              >
+                Filter
+              </Button>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={Boolean(filterAnchorEl)}
+                onClose={() => setFilterAnchorEl(null)}
+                slotProps={{ paper: { sx: { p: 2, minWidth: 280 } } }}
+              >
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomTextField
+                    placeholder="Cari nama dokumen..."
+                    value={search}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconSearch size={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <CustomSelect
+                    value={filterKategori}
+                    onChange={(e: any) => handleFilterKategoriChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Kategori"
+                  >
+                    <MenuItem value="">Semua Kategori</MenuItem>
+                    {kategoriOptions.map((kategori) => (
+                      <MenuItem key={kategori} value={kategori}>
+                        {kategori}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                  <CustomSelect
+                    value={filterPublic}
+                    onChange={(e: any) => handleFilterPublicChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Status"
+                  >
+                    <MenuItem value="">Semua Status</MenuItem>
+                    <MenuItem value="1">Publik</MenuItem>
+                    <MenuItem value="0">Privat</MenuItem>
+                  </CustomSelect>
+                </Box>
+              </Menu>
+              <Box flexGrow={1} />
+              <Button
+                variant="outlined"
+                startIcon={<IconRefresh size={18} />}
+                onClick={handleRefresh}
+              >
+                Refresh
               </Button>
             </Box>
 

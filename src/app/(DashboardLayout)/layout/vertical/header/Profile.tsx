@@ -48,7 +48,10 @@ const Profile = () => {
     } finally {
       localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
       removeSecureItem(STORAGE_KEYS.USER);
+      // Remove auth cookie
+      document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       router.push('/auth/login');
+      router.refresh();
     }
   };
 

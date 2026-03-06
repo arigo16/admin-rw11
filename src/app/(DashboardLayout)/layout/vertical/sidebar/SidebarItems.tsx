@@ -72,7 +72,7 @@ const SidebarItems = () => {
             <MenuItem value="rw">
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <IconBuilding size={18} />
-                <span>RW 11</span>
+                <span>RW 011</span>
               </Box>
             </MenuItem>
             <Divider sx={{ my: 0.5 }} />
@@ -80,7 +80,7 @@ const SidebarItems = () => {
               <MenuItem key={rt} value={`rt-${rt}`}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <IconHome2 size={18} />
-                  <span>RT {rt}</span>
+                  <span>RT {String(rt).padStart(3, '0')}</span>
                 </Box>
               </MenuItem>
             ))}

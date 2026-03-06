@@ -10,13 +10,14 @@ const Logo = () => {
   const { isCollapse, isSidebarHover, activeDir, activeMode } = useContext(CustomizerContext);
 
   const TopbarHeight = config.topbarHeight;
+  const isMini = isCollapse === "mini-sidebar" && !isSidebarHover;
 
   const LinkStyled = styled(Link)(() => ({
     height: TopbarHeight,
-
-    width: isCollapse == "mini-sidebar" && !isSidebarHover ? '40px' : '180px',
+    width: isMini ? '40px' : '180px',
     overflow: "hidden",
-    display: "block",
+    display: "flex",
+    alignItems: "center",
   }));
 
   if (activeDir === "ltr") {
@@ -24,19 +25,29 @@ const Logo = () => {
       <LinkStyled href="/">
         {activeMode === "dark" ? (
           <Image
-            src="/images/logos/light-logo.svg"
+            src="/images/logos/light-logo.png"
             alt="logo"
-            height={TopbarHeight}
-            width={174}
+            height={50}
+            width={180}
             priority
+            style={{
+              objectFit: 'contain',
+              width: 'auto',
+              height: '50px',
+            }}
           />
         ) : (
           <Image
-            src={"/images/logos/dark-logo.svg"}
+            src={"/images/logos/dark-logo.png"}
             alt="logo"
-            height={TopbarHeight}
-            width={174}
+            height={50}
+            width={180}
             priority
+            style={{
+              objectFit: 'contain',
+              width: 'auto',
+              height: '50px',
+            }}
           />
         )}
       </LinkStyled>
@@ -47,19 +58,29 @@ const Logo = () => {
     <LinkStyled href="/">
       {activeMode === "dark" ? (
         <Image
-          src="/images/logos/dark-rtl-logo.svg"
+          src="/images/logos/dark-rtl-logo.png"
           alt="logo"
-          height={TopbarHeight}
-          width={174}
+          height={50}
+          width={180}
           priority
+          style={{
+            objectFit: 'contain',
+            width: 'auto',
+            height: '50px',
+          }}
         />
       ) : (
         <Image
-          src="/images/logos/light-logo-rtl.svg"
+          src="/images/logos/light-logo-rtl.png"
           alt="logo"
-          height={TopbarHeight}
-          width={174}
+          height={50}
+          width={180}
           priority
+          style={{
+            objectFit: 'contain',
+            width: 'auto',
+            height: '50px',
+          }}
         />
       )}
     </LinkStyled>

@@ -28,7 +28,8 @@ import CustomTextField from '@/app/components/forms/theme-elements/CustomTextFie
 import CustomSelect from '@/app/components/forms/theme-elements/CustomSelect';
 import CustomFormLabel from '@/app/components/forms/theme-elements/CustomFormLabel';
 import Menu from '@mui/material/Menu';
-import { IconPlus, IconEdit, IconTrash, IconEye, IconEyeOff, IconDotsVertical, IconUpload } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconTrash, IconEye, IconEyeOff, IconDotsVertical, IconUpload, IconSearch, IconRefresh, IconFilter } from '@tabler/icons-react';
+import InputAdornment from '@mui/material/InputAdornment';
 import { beritaAPI } from '@/services/api';
 import dynamic from 'next/dynamic';
 
@@ -67,6 +68,10 @@ export default function BeritaPage() {
   const [berita, setBerita] = useState<Berita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Filter state
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -91,6 +96,7 @@ export default function BeritaPage() {
   // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuItemId, setMenuItemId] = useState<number | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setAnchorEl(event.currentTarget);
@@ -104,15 +110,19 @@ export default function BeritaPage() {
 
   useEffect(() => {
     fetchBerita();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, search, filterStatus]);
 
   const fetchBerita = async () => {
     setIsLoading(true);
     try {
-      const response = await beritaAPI.getAll({
+      const params: any = {
         page: page + 1,
         per_page: rowsPerPage,
-      });
+      };
+      if (search) params.search = search;
+      if (filterStatus) params.status = filterStatus;
+
+      const response = await beritaAPI.getAll(params);
       setBerita(response.data.data || []);
       if (response.data.meta) {
         setMeta(response.data.meta);
@@ -122,6 +132,20 @@ export default function BeritaPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchBerita();
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
+
+  const handleFilterStatusChange = (value: string) => {
+    setFilterStatus(value);
+    setPage(0);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -238,6 +262,57 @@ export default function BeritaPage() {
                 onClick={() => handleOpenDialog()}
               >
                 Tambah Berita
+              </Button>
+            </Box>
+
+            {/* Filter Section */}
+            <Box display="flex" gap={2} mb={3} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<IconFilter size={18} />}
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              >
+                Filter
+              </Button>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={Boolean(filterAnchorEl)}
+                onClose={() => setFilterAnchorEl(null)}
+                slotProps={{ paper: { sx: { p: 2, minWidth: 280 } } }}
+              >
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomTextField
+                    placeholder="Cari judul/konten..."
+                    value={search}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconSearch size={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <CustomSelect
+                    value={filterStatus}
+                    onChange={(e: any) => handleFilterStatusChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Status"
+                  >
+                    <MenuItem value="">Semua Status</MenuItem>
+                    <MenuItem value="draft">Draft</MenuItem>
+                    <MenuItem value="published">Published</MenuItem>
+                  </CustomSelect>
+                </Box>
+              </Menu>
+              <Box flexGrow={1} />
+              <Button
+                variant="outlined"
+                startIcon={<IconRefresh size={18} />}
+                onClick={handleRefresh}
+              >
+                Refresh
               </Button>
             </Box>
 

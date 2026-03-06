@@ -15,17 +15,11 @@ import { IconX, IconSettings, IconCheck } from "@tabler/icons-react";
 import Scrollbar from "@/app/components/custom-scroll/Scrollbar";
 import WbSunnyTwoToneIcon from "@mui/icons-material/WbSunnyTwoTone";
 import DarkModeTwoToneIcon from "@mui/icons-material/DarkModeTwoTone";
-import SwipeLeftAltTwoToneIcon from "@mui/icons-material/SwipeLeftAltTwoTone";
-import SwipeRightAltTwoToneIcon from "@mui/icons-material/SwipeRightAltTwoTone";
 import AspectRatioTwoToneIcon from "@mui/icons-material/AspectRatioTwoTone";
 import CallToActionTwoToneIcon from "@mui/icons-material/CallToActionTwoTone";
 import ViewSidebarTwoToneIcon from "@mui/icons-material/ViewSidebarTwoTone";
 import WebAssetTwoToneIcon from "@mui/icons-material/WebAssetTwoTone";
-import {
-  ViewComfyTwoTone,
-  PaddingTwoTone,
-  BorderOuter,
-} from "@mui/icons-material";
+import { BorderOuter } from "@mui/icons-material";
 
 const SidebarWidth = "320px";
 interface colors {
@@ -36,15 +30,12 @@ interface colors {
 const Customizer: FC = () => {
   const [showDrawer, setShowDrawer] = useState(false);
   const {
-    activeDir,
-    setActiveDir,
     activeMode,
     setActiveMode,
     isCollapse,
     setIsCollapse,
     activeTheme,
     activeLayout,
-    setActiveLayout,
     isLayout,
     isCardShadow,
     setIsCardShadow,
@@ -188,36 +179,6 @@ const Customizer: FC = () => {
 
             <Box pt={3} />
             {/* ------------------------------------------- */}
-            {/* ------------ RTL theme setting -------------*/}
-            {/* ------------------------------------------- */}
-            <Typography variant="h6" gutterBottom>
-              Theme Direction
-            </Typography>
-            <Stack direction={"row"} gap={2} my={2}>
-              <StyledBox
-                onClick={() => setActiveDir("ltr")}
-                display="flex"
-                gap={1}
-              >
-                <SwipeLeftAltTwoToneIcon
-                  color={activeDir === "ltr" ? "primary" : "inherit"}
-                />{" "}
-                LTR
-              </StyledBox>
-              <StyledBox
-                onClick={() => setActiveDir("rtl")}
-                display="flex"
-                gap={1}
-              >
-                <SwipeRightAltTwoToneIcon
-                  color={activeDir === "rtl" ? "primary" : "inherit"}
-                />{" "}
-                RTL
-              </StyledBox>
-            </Stack>
-
-            <Box pt={3} />
-            {/* ------------------------------------------- */}
             {/* ------------ Theme Color setting ------------- */}
             {/* ------------------------------------------- */}
             <Typography variant="h6" gutterBottom>
@@ -255,39 +216,6 @@ const Customizer: FC = () => {
                 </Grid>
               ))}
             </Grid>
-            <Box pt={4} />
-            {/* ------------------------------------------- */}
-            {/* ------------ Layout Horizontal / Vertical ------------- */}
-            {/* ------------------------------------------- */}
-            <Typography variant="h6" gutterBottom>
-              Layout Type
-            </Typography>
-            <Stack direction={"row"} gap={2} my={2}>
-              <StyledBox
-                onClick={() => setActiveLayout("vertical")}
-                display="flex"
-                gap={1}
-              >
-                <ViewComfyTwoTone
-                  color={
-                    activeLayout === 'vertical' ? "primary" : "inherit"
-                  }
-                />
-                Vertical
-              </StyledBox>
-              <StyledBox
-                onClick={() => setActiveLayout("horizontal")}
-                display="flex"
-                gap={1}
-              >
-                <PaddingTwoTone
-                  color={
-                    activeLayout === 'horizontal' ? "primary" : "inherit"
-                  }
-                />
-                Horizontal
-              </StyledBox>
-            </Stack>
             <Box pt={4} />
             {/* ------------------------------------------- */}
             {/* ------------ Layout Boxed / Full ------------- */}

@@ -15,10 +15,15 @@ import TablePagination from '@mui/material/TablePagination';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 import PageContainer from '@/app/components/container/PageContainer';
 import { useOrg } from '@/app/context/orgContext';
 import { useSnackbar } from '@/app/context/snackbarContext';
 import { createRtAPI, RtBill } from '@/services/api';
+import CustomSelect from '@/app/components/forms/theme-elements/CustomSelect';
+import { IconRefresh, IconFilter } from '@tabler/icons-react';
 
 interface PaginationMeta {
   current_page: number;
@@ -53,19 +58,41 @@ const getStatusLabel = (status: string) => {
   }
 };
 
+const monthOptions = [
+  { value: 1, label: 'Januari' },
+  { value: 2, label: 'Februari' },
+  { value: 3, label: 'Maret' },
+  { value: 4, label: 'April' },
+  { value: 5, label: 'Mei' },
+  { value: 6, label: 'Juni' },
+  { value: 7, label: 'Juli' },
+  { value: 8, label: 'Agustus' },
+  { value: 9, label: 'September' },
+  { value: 10, label: 'Oktober' },
+  { value: 11, label: 'November' },
+  { value: 12, label: 'Desember' },
+];
+
 const getMonthName = (month: number) => {
-  const months = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-  ];
-  return months[month - 1] || '';
+  return monthOptions.find((m) => m.value === month)?.label || '';
 };
+
+// Generate year options (current year - 5 to current year + 1)
+const currentYear = new Date().getFullYear();
+const yearOptions = Array.from({ length: 7 }, (_, i) => currentYear - 5 + i);
 
 export default function IplBillsPage() {
   const { rtId, orgLabel } = useOrg();
   const { showError } = useSnackbar();
   const [bills, setBills] = useState<RtBill[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Filter state
+  const [filterYear, setFilterYear] = useState('');
+  const [filterMonth, setFilterMonth] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
@@ -74,17 +101,22 @@ export default function IplBillsPage() {
     if (rtId) {
       fetchBills();
     }
-  }, [rtId, page, rowsPerPage]);
+  }, [rtId, page, rowsPerPage, filterYear, filterMonth, filterStatus]);
 
   const fetchBills = async () => {
     if (!rtId) return;
     setIsLoading(true);
     try {
       const rtAPI = createRtAPI(rtId);
-      const response = await rtAPI.getBillsIPL({
+      const params: any = {
         page: page + 1,
         per_page: rowsPerPage,
-      });
+      };
+      if (filterYear) params.year = filterYear;
+      if (filterMonth) params.month = filterMonth;
+      if (filterStatus) params.status = filterStatus;
+
+      const response = await rtAPI.getBillsIPL(params);
       setBills(response.data.data || []);
       if (response.data.meta) {
         setMeta(response.data.meta);
@@ -96,11 +128,31 @@ export default function IplBillsPage() {
     }
   };
 
+  const handleRefresh = () => {
+    fetchBills();
+  };
+
+  const handleFilterChange = (setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    setPage(0);
+  };
+
   if (!rtId) {
     return (
       <PageContainer title="Tagihan IPL" description="">
         <Box mt={3}>
-          <Alert severity="warning">Silakan pilih RT dari dropdown di sidebar.</Alert>
+          <Card>
+            <CardContent>
+              <Skeleton variant="text" width={200} height={32} sx={{ mb: 3 }} />
+              <Box display="flex" gap={2} mb={3}>
+                <Skeleton variant="rounded" width={150} height={40} />
+                <Skeleton variant="rounded" width={150} height={40} />
+              </Box>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} variant="text" height={50} sx={{ mb: 1 }} />
+              ))}
+            </CardContent>
+          </Card>
         </Box>
       </PageContainer>
     );
@@ -114,6 +166,71 @@ export default function IplBillsPage() {
             <Typography variant="h5" fontWeight={600} mb={3}>
               Tagihan IPL {orgLabel}
             </Typography>
+
+            {/* Filter Section */}
+            <Box display="flex" gap={2} mb={3} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<IconFilter size={18} />}
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              >
+                Filter
+              </Button>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={Boolean(filterAnchorEl)}
+                onClose={() => setFilterAnchorEl(null)}
+                slotProps={{ paper: { sx: { p: 2, minWidth: 280 } } }}
+              >
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomSelect
+                    value={filterYear}
+                    onChange={(e: any) => handleFilterChange(setFilterYear)(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Tahun"
+                  >
+                    <MenuItem value="">Semua Tahun</MenuItem>
+                    {yearOptions.map((year) => (
+                      <MenuItem key={year} value={String(year)}>
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                  <CustomSelect
+                    value={filterMonth}
+                    onChange={(e: any) => handleFilterChange(setFilterMonth)(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Bulan"
+                  >
+                    <MenuItem value="">Semua Bulan</MenuItem>
+                    {monthOptions.map((month) => (
+                      <MenuItem key={month.value} value={String(month.value)}>
+                        {month.label}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                  <CustomSelect
+                    value={filterStatus}
+                    onChange={(e: any) => handleFilterChange(setFilterStatus)(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Status"
+                  >
+                    <MenuItem value="">Semua Status</MenuItem>
+                    <MenuItem value="unpaid">Belum Bayar</MenuItem>
+                    <MenuItem value="pending">Pending</MenuItem>
+                    <MenuItem value="paid">Lunas</MenuItem>
+                  </CustomSelect>
+                </Box>
+              </Menu>
+              <Box flexGrow={1} />
+              <Button
+                variant="outlined"
+                startIcon={<IconRefresh size={18} />}
+                onClick={handleRefresh}
+              >
+                Refresh
+              </Button>
+            </Box>
 
             <TableContainer>
               <Table>

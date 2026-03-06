@@ -27,7 +27,8 @@ import CustomTextField from '@/app/components/forms/theme-elements/CustomTextFie
 import CustomSelect from '@/app/components/forms/theme-elements/CustomSelect';
 import CustomFormLabel from '@/app/components/forms/theme-elements/CustomFormLabel';
 import Menu from '@mui/material/Menu';
-import { IconPlus, IconEdit, IconTrash, IconUpload, IconDotsVertical } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconTrash, IconUpload, IconDotsVertical, IconSearch, IconRefresh, IconFilter } from '@tabler/icons-react';
+import InputAdornment from '@mui/material/InputAdornment';
 import { assetsAPI } from '@/services/api';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -67,6 +68,10 @@ export default function AssetsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { showError, showSuccess } = useSnackbar();
 
+  // Filter state
+  const [search, setSearch] = useState('');
+  const [filterKategori, setFilterKategori] = useState('');
+
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -92,6 +97,7 @@ export default function AssetsPage() {
   // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [menuItemId, setMenuItemId] = useState<number | null>(null);
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setAnchorEl(event.currentTarget);
@@ -105,15 +111,19 @@ export default function AssetsPage() {
 
   useEffect(() => {
     fetchAssets();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, search, filterKategori]);
 
   const fetchAssets = async () => {
     setIsLoading(true);
     try {
-      const response = await assetsAPI.getAll({
+      const params: any = {
         page: page + 1,
         per_page: rowsPerPage,
-      });
+      };
+      if (search) params.search = search;
+      if (filterKategori) params.kategori = filterKategori;
+
+      const response = await assetsAPI.getAll(params);
       setAssets(response.data.data || []);
       if (response.data.meta) {
         setMeta(response.data.meta);
@@ -123,6 +133,20 @@ export default function AssetsPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefresh = () => {
+    fetchAssets();
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(0);
+  };
+
+  const handleFilterKategoriChange = (value: string) => {
+    setFilterKategori(value);
+    setPage(0);
   };
 
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -238,6 +262,60 @@ export default function AssetsPage() {
                 onClick={() => handleOpenDialog()}
               >
                 Tambah Inventaris
+              </Button>
+            </Box>
+
+            {/* Filter Section */}
+            <Box display="flex" gap={2} mb={3} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<IconFilter size={18} />}
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              >
+                Filter
+              </Button>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={Boolean(filterAnchorEl)}
+                onClose={() => setFilterAnchorEl(null)}
+                slotProps={{ paper: { sx: { p: 2, minWidth: 280 } } }}
+              >
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomTextField
+                    placeholder="Cari nama inventaris..."
+                    value={search}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <IconSearch size={18} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <CustomSelect
+                    value={filterKategori}
+                    onChange={(e: any) => handleFilterKategoriChange(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Kategori"
+                  >
+                    <MenuItem value="">Semua Kategori</MenuItem>
+                    {kategoriOptions.map((kategori) => (
+                      <MenuItem key={kategori} value={kategori}>
+                        {kategori}
+                      </MenuItem>
+                    ))}
+                  </CustomSelect>
+                </Box>
+              </Menu>
+              <Box flexGrow={1} />
+              <Button
+                variant="outlined"
+                startIcon={<IconRefresh size={18} />}
+                onClick={handleRefresh}
+              >
+                Refresh
               </Button>
             </Box>
 

@@ -73,7 +73,7 @@ const Header = () => {
               />
             )}
           </IconButton>
-          <Notifications />
+          {/* <Notifications /> */}
           <Profile />
         </Stack>
       </ToolbarStyled>

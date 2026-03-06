@@ -27,12 +27,6 @@ import {
   IconHome,
   IconReceipt,
   IconCash,
-  IconWallet,
-  IconChartBar,
-  IconSpeakerphone,
-  IconHeart,
-  IconMessageCircle,
-  IconBulb,
 } from "@tabler/icons-react";
 
 // Menu untuk RW (menu yang sudah ada)
@@ -162,52 +156,6 @@ export const RtMenuItems: MenuitemsType[] = [
     title: "Transaksi",
     icon: IconCash,
     href: "/rt/transactions",
-  },
-  {
-    id: uniqueId(),
-    title: "Saldo",
-    icon: IconWallet,
-    href: "/rt/balance",
-  },
-
-  {
-    navlabel: true,
-    subheader: "Partisipasi",
-  },
-  {
-    id: uniqueId(),
-    title: "Voting",
-    icon: IconChartBar,
-    href: "/rt/votes",
-  },
-  {
-    id: uniqueId(),
-    title: "Iuran/Donasi",
-    icon: IconHeart,
-    href: "/rt/contributions",
-  },
-
-  {
-    navlabel: true,
-    subheader: "Komunikasi",
-  },
-  {
-    id: uniqueId(),
-    title: "Pengumuman",
-    icon: IconSpeakerphone,
-    href: "/rt/information",
-  },
-  {
-    id: uniqueId(),
-    title: "Keluhan",
-    icon: IconMessageCircle,
-    href: "/rt/complaints",
-  },
-  {
-    id: uniqueId(),
-    title: "Saran",
-    icon: IconBulb,
-    href: "/rt/suggestions",
   },
 ];
 

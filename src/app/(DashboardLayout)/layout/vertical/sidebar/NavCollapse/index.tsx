@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { usePathname } from "next/navigation";
 
 // mui imports
+import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -58,6 +59,7 @@ export default function NavCollapse({
   const pathname = usePathname();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+
   const menuIcon = Icon
     ? (level > 1 ? <Icon stroke={1.5} size="1rem" /> : <Icon stroke={1.5} size="1.3rem" />)
     : null;
@@ -76,25 +78,27 @@ export default function NavCollapse({
     });
   }, [pathname, menu.children]);
 
+  // Styled component sama persis seperti NavItem
   const ListItemStyled = styled(ListItemButton)(() => ({
+    whiteSpace: 'nowrap',
     marginBottom: '2px',
     padding: '8px 10px',
-    paddingLeft: hideMenu ? '10px' : level > 2 ? `${level * 15}px` : '10px',
-    backgroundColor: open && level < 2 ? theme.palette.primary.main : '',
-    whiteSpace: 'nowrap',
-    '&:hover': {
-      backgroundColor: pathname.includes(menu.href) || open
-        ? theme.palette.primary.main
-        : theme.palette.primary.light,
-      color: pathname.includes(menu.href) || open ? 'white' : theme.palette.primary.main,
-    },
-    color:
-      open && level < 2
-        ? 'white'
-        : level > 1 && open
-          ? theme.palette.primary.main
-          : theme.palette.text.secondary,
     borderRadius: `${isBorderRadius}px`,
+    backgroundColor: 'transparent',
+    color: theme.palette.text.secondary,
+    paddingLeft: hideMenu ? '10px' : level > 2 ? `${level * 15}px` : '10px',
+    '&:hover': {
+      backgroundColor: theme.palette.primary.light,
+      color: theme.palette.primary.main,
+    },
+    '&.Mui-selected': {
+      color: 'white',
+      backgroundColor: theme.palette.primary.main,
+      '&:hover': {
+        backgroundColor: theme.palette.primary.main,
+        color: 'white',
+      },
+    },
   }));
 
   // If Menu has Children
@@ -125,32 +129,37 @@ export default function NavCollapse({
     }
   });
 
+  // Set selected=true when open (untuk trigger &.Mui-selected styles)
+  const isSelected = open && level < 2;
+
   return (
     <>
       <ListItemStyled
         onClick={handleClick}
-        selected={pathWithoutLastPart === menu.href}
+        selected={isSelected}
         key={menu?.id}
       >
         {menuIcon && (
           <ListItemIcon
             sx={{
-              minWidth: "36px",
-              p: "3px 0",
-              color: "inherit",
+              minWidth: '36px',
+              p: '3px 0',
+              color: 'inherit',
             }}
           >
             {menuIcon}
           </ListItemIcon>
         )}
-        <ListItemText color="inherit">
-          {hideMenu ? "" : <>{t(`${menu.title}`)}</>}
+        <ListItemText>
+          {hideMenu ? '' : <>{t(`${menu.title}`)}</>}
         </ListItemText>
-        {!open ? (
-          <IconChevronDown size="1rem" />
-        ) : (
-          <IconChevronUp size="1rem" />
-        )}
+        <Box sx={{ color: 'inherit', display: 'flex' }}>
+          {!open ? (
+            <IconChevronDown size="1rem" />
+          ) : (
+            <IconChevronUp size="1rem" />
+          )}
+        </Box>
       </ListItemStyled>
       <Collapse in={open} timeout="auto">
         {submenus}
@@ -158,5 +167,3 @@ export default function NavCollapse({
     </>
   );
 };
-
-

@@ -12,14 +12,7 @@ import PageContainer from '@/app/components/container/PageContainer';
 import { useOrg } from '@/app/context/orgContext';
 import { useSnackbar } from '@/app/context/snackbarContext';
 import { createRtAPI, RtDashboard } from '@/services/api';
-import {
-  IconHome,
-  IconReceipt,
-  IconWallet,
-  IconChartBar,
-  IconMessageCircle,
-  IconBulb,
-} from '@tabler/icons-react';
+import { IconHome, IconWallet } from '@tabler/icons-react';
 
 interface StatCardProps {
   title: string;
@@ -104,7 +97,24 @@ export default function RtDashboardPage() {
     return (
       <PageContainer title="RT Dashboard" description="">
         <Box mt={3}>
-          <Alert severity="warning">Silakan pilih RT dari dropdown di sidebar.</Alert>
+          <Skeleton variant="text" width={200} height={40} sx={{ mb: 3 }} />
+          <Grid container spacing={3}>
+            {[1, 2, 3, 4].map((i) => (
+              <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Card>
+                  <CardContent>
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Skeleton variant="rounded" width={56} height={56} />
+                      <Box flex={1}>
+                        <Skeleton variant="text" width="60%" height={32} />
+                        <Skeleton variant="text" width="80%" height={20} />
+                      </Box>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       </PageContainer>
     );
@@ -185,80 +195,6 @@ export default function RtDashboardPage() {
                   value={formatCurrency(dashboard.balance.total)}
                   icon={<IconWallet size={28} />}
                   color="success"
-                />
-              </Grid>
-            </Grid>
-
-            {/* Tagihan Belum Dibayar */}
-            <Typography variant="h6" fontWeight={600} mb={2}>
-              Tagihan Belum Dibayar
-            </Typography>
-            <Grid container spacing={3} mb={4}>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <StatCard
-                  title="IPL"
-                  value={dashboard.unpaid_bills.ipl}
-                  subtitle="tagihan"
-                  icon={<IconReceipt size={28} />}
-                  color="error"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <StatCard
-                  title="Kas"
-                  value={dashboard.unpaid_bills.cash}
-                  subtitle="tagihan"
-                  icon={<IconReceipt size={28} />}
-                  color="warning"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <StatCard
-                  title="PKK"
-                  value={dashboard.unpaid_bills.pkk}
-                  subtitle="tagihan"
-                  icon={<IconReceipt size={28} />}
-                  color="info"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <StatCard
-                  title="Total"
-                  value={dashboard.unpaid_bills.total}
-                  subtitle="tagihan"
-                  icon={<IconReceipt size={28} />}
-                  color="error"
-                />
-              </Grid>
-            </Grid>
-
-            {/* Status Lainnya */}
-            <Typography variant="h6" fontWeight={600} mb={2}>
-              Status Lainnya
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <StatCard
-                  title="Voting Aktif"
-                  value={dashboard.active_votes}
-                  icon={<IconChartBar size={28} />}
-                  color="primary"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <StatCard
-                  title="Keluhan Pending"
-                  value={dashboard.pending.complaints}
-                  icon={<IconMessageCircle size={28} />}
-                  color="warning"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <StatCard
-                  title="Saran Pending"
-                  value={dashboard.pending.suggestions}
-                  icon={<IconBulb size={28} />}
-                  color="info"
                 />
               </Grid>
             </Grid>

@@ -47,7 +47,7 @@ export const OrgProvider = ({ children }: { children: ReactNode }) => {
     setRtId(type === 'rt' && rt ? rt : null);
   };
 
-  const orgLabel = orgType === 'rw' ? 'RW 11' : `RT ${rtId}`;
+  const orgLabel = orgType === 'rw' ? 'RW 011' : `RT ${String(rtId).padStart(3, '0')}`;
 
   const getApiPrefix = () => {
     if (orgType === 'rw') return '';

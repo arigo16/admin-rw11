@@ -15,10 +15,16 @@ import TablePagination from '@mui/material/TablePagination';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
 import Skeleton from '@mui/material/Skeleton';
+import Button from '@mui/material/Button';
+import MenuItem from '@mui/material/MenuItem';
+import Menu from '@mui/material/Menu';
 import PageContainer from '@/app/components/container/PageContainer';
 import { useOrg } from '@/app/context/orgContext';
 import { useSnackbar } from '@/app/context/snackbarContext';
 import { createRtAPI, RtTransaction } from '@/services/api';
+import CustomSelect from '@/app/components/forms/theme-elements/CustomSelect';
+import CustomTextField from '@/app/components/forms/theme-elements/CustomTextField';
+import { IconRefresh, IconFilter } from '@tabler/icons-react';
 
 interface PaginationMeta {
   current_page: number;
@@ -32,6 +38,14 @@ export default function TransactionsPage() {
   const { showError } = useSnackbar();
   const [transactions, setTransactions] = useState<RtTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Filter state
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterMutation, setFilterMutation] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
@@ -40,17 +54,23 @@ export default function TransactionsPage() {
     if (rtId) {
       fetchTransactions();
     }
-  }, [rtId, page, rowsPerPage]);
+  }, [rtId, page, rowsPerPage, filterCategory, filterMutation, startDate, endDate]);
 
   const fetchTransactions = async () => {
     if (!rtId) return;
     setIsLoading(true);
     try {
       const rtAPI = createRtAPI(rtId);
-      const response = await rtAPI.getTransactions({
+      const params: any = {
         page: page + 1,
         per_page: rowsPerPage,
-      });
+      };
+      if (filterCategory) params.category = filterCategory;
+      if (filterMutation) params.mutation = filterMutation;
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+
+      const response = await rtAPI.getTransactions(params);
       setTransactions(response.data.data || []);
       if (response.data.meta) {
         setMeta(response.data.meta);
@@ -62,11 +82,31 @@ export default function TransactionsPage() {
     }
   };
 
+  const handleRefresh = () => {
+    fetchTransactions();
+  };
+
+  const handleFilterChange = (setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    setPage(0);
+  };
+
   if (!rtId) {
     return (
       <PageContainer title="Transaksi" description="">
         <Box mt={3}>
-          <Alert severity="warning">Silakan pilih RT dari dropdown di sidebar.</Alert>
+          <Card>
+            <CardContent>
+              <Skeleton variant="text" width={200} height={32} sx={{ mb: 3 }} />
+              <Box display="flex" gap={2} mb={3}>
+                <Skeleton variant="rounded" width={150} height={40} />
+                <Skeleton variant="rounded" width={150} height={40} />
+              </Box>
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} variant="text" height={50} sx={{ mb: 1 }} />
+              ))}
+            </CardContent>
+          </Card>
         </Box>
       </PageContainer>
     );
@@ -80,6 +120,70 @@ export default function TransactionsPage() {
             <Typography variant="h5" fontWeight={600} mb={3}>
               Transaksi {orgLabel}
             </Typography>
+
+            {/* Filter Section */}
+            <Box display="flex" gap={2} mb={3} alignItems="center">
+              <Button
+                variant="outlined"
+                startIcon={<IconFilter size={18} />}
+                onClick={(e) => setFilterAnchorEl(e.currentTarget)}
+              >
+                Filter
+              </Button>
+              <Menu
+                anchorEl={filterAnchorEl}
+                open={Boolean(filterAnchorEl)}
+                onClose={() => setFilterAnchorEl(null)}
+                slotProps={{ paper: { sx: { p: 2, minWidth: 280 } } }}
+              >
+                <Box display="flex" flexDirection="column" gap={2}>
+                  <CustomSelect
+                    value={filterCategory}
+                    onChange={(e: any) => handleFilterChange(setFilterCategory)(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Kategori"
+                  >
+                    <MenuItem value="">Semua Kategori</MenuItem>
+                    <MenuItem value="utama">Utama</MenuItem>
+                    <MenuItem value="pkk">PKK</MenuItem>
+                  </CustomSelect>
+                  <CustomSelect
+                    value={filterMutation}
+                    onChange={(e: any) => handleFilterChange(setFilterMutation)(e.target.value)}
+                    sx={{ width: '100%' }}
+                    placeholder="Semua Mutasi"
+                  >
+                    <MenuItem value="">Semua Mutasi</MenuItem>
+                    <MenuItem value="kredit">Masuk (Kredit)</MenuItem>
+                    <MenuItem value="debit">Keluar (Debit)</MenuItem>
+                  </CustomSelect>
+                  <CustomTextField
+                    type="date"
+                    label="Dari Tanggal"
+                    value={startDate}
+                    onChange={(e: any) => handleFilterChange(setStartDate)(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ width: '100%' }}
+                  />
+                  <CustomTextField
+                    type="date"
+                    label="Sampai Tanggal"
+                    value={endDate}
+                    onChange={(e: any) => handleFilterChange(setEndDate)(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ width: '100%' }}
+                  />
+                </Box>
+              </Menu>
+              <Box flexGrow={1} />
+              <Button
+                variant="outlined"
+                startIcon={<IconRefresh size={18} />}
+                onClick={handleRefresh}
+              >
+                Refresh
+              </Button>
+            </Box>
 
             <TableContainer>
               <Table>

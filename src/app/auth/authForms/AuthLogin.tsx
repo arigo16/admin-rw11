@@ -33,10 +33,15 @@ const AuthLogin = ({ title, subtext }: loginType) => {
       const response = await authAPI.login(email, password);
       const { token, user } = response.data.data;
 
+      // Store in localStorage
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
       setSecureItem(STORAGE_KEYS.USER, user);
 
+      // Store in cookie for middleware
+      document.cookie = `auth_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
+
       router.push('/');
+      router.refresh();
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.message ||
