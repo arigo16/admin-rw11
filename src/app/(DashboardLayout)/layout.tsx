@@ -10,6 +10,7 @@ import Navigation from "./layout/horizontal/navbar/Navigation";
 import HorizontalHeader from "./layout/horizontal/header/Header";
 import { CustomizerContext } from "@/app/context/customizerContext";
 import config from "@/app/context/config";
+import AuthGuard from "@/app/components/auth/AuthGuard";
 
 const MainWrapper = styled("div")(() => ({
   display: "flex",
@@ -43,58 +44,60 @@ export default function RootLayout({
   const theme = useTheme();
 
   return (
-    <MainWrapper>
-      {/* ------------------------------------------- */}
-      {/* Sidebar */}
-      {/* ------------------------------------------- */}
-      {/* {activeLayout === 'horizontal' ? "" : <Sidebar />} */}
-
-      <Activity mode={activeLayout === "horizontal" ? "hidden" : "visible"}>
-
-        <Sidebar />
-
-      </Activity>
-      {/* ------------------------------------------- */}
-      {/* Main Wrapper */}
-      {/* ------------------------------------------- */}
-      <PageWrapper
-        className="page-wrapper"
-        sx={{
-          ...(isCollapse === "mini-sidebar" && {
-            [theme.breakpoints.up("lg")]: {
-              ml: `${MiniSidebarWidth}px`,
-            },
-          }),
-        }}
-      >
+    <AuthGuard>
+      <MainWrapper>
         {/* ------------------------------------------- */}
-        {/* Header */}
+        {/* Sidebar */}
         {/* ------------------------------------------- */}
-        {activeLayout === 'horizontal' ? <HorizontalHeader /> : <Header />}
+        {/* {activeLayout === 'horizontal' ? "" : <Sidebar />} */}
 
-        {/* PageContent */}
-        {activeLayout === 'horizontal' ? <Navigation /> : ""}
-        <Container
+        <Activity mode={activeLayout === "horizontal" ? "hidden" : "visible"}>
+
+          <Sidebar />
+
+        </Activity>
+        {/* ------------------------------------------- */}
+        {/* Main Wrapper */}
+        {/* ------------------------------------------- */}
+        <PageWrapper
+          className="page-wrapper"
           sx={{
-            maxWidth: isLayout === "boxed" ? "lg" : "100%!important",
+            ...(isCollapse === "mini-sidebar" && {
+              [theme.breakpoints.up("lg")]: {
+                ml: `${MiniSidebarWidth}px`,
+              },
+            }),
           }}
         >
           {/* ------------------------------------------- */}
+          {/* Header */}
+          {/* ------------------------------------------- */}
+          {activeLayout === 'horizontal' ? <HorizontalHeader /> : <Header />}
+
           {/* PageContent */}
-          {/* ------------------------------------------- */}
+          {activeLayout === 'horizontal' ? <Navigation /> : ""}
+          <Container
+            sx={{
+              maxWidth: isLayout === "boxed" ? "lg" : "100%!important",
+            }}
+          >
+            {/* ------------------------------------------- */}
+            {/* PageContent */}
+            {/* ------------------------------------------- */}
 
-          <Box sx={{ minHeight: "calc(100vh - 170px)" }}>
-            {/* <Outlet /> */}
-            {children}
-            {/* <Index /> */}
-          </Box>
+            <Box sx={{ minHeight: "calc(100vh - 170px)" }}>
+              {/* <Outlet /> */}
+              {children}
+              {/* <Index /> */}
+            </Box>
 
-          {/* ------------------------------------------- */}
-          {/* End Page */}
-          {/* ------------------------------------------- */}
-        </Container>
-        <Customizer />
-      </PageWrapper>
-    </MainWrapper>
+            {/* ------------------------------------------- */}
+            {/* End Page */}
+            {/* ------------------------------------------- */}
+          </Container>
+          <Customizer />
+        </PageWrapper>
+      </MainWrapper>
+    </AuthGuard>
   );
 }
