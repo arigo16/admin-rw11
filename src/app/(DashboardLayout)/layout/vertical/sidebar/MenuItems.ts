@@ -138,39 +138,39 @@ export const RtMenuItems: MenuitemsType[] = [
     href: "/rt/houses",
   },
 
-  {
-    navlabel: true,
-    subheader: "Keuangan",
-  },
-  {
-    id: uniqueId(),
-    title: "Tagihan",
-    icon: IconReceipt,
-    href: "/rt/bills",
-    children: [
-      {
-        id: uniqueId(),
-        title: "IPL",
-        href: "/rt/bills/ipl",
-      },
-      {
-        id: uniqueId(),
-        title: "Kas",
-        href: "/rt/bills/cash",
-      },
-      {
-        id: uniqueId(),
-        title: "PKK",
-        href: "/rt/bills/pkk",
-      },
-    ],
-  },
-  {
-    id: uniqueId(),
-    title: "Transaksi",
-    icon: IconCash,
-    href: "/rt/transactions",
-  },
+  // {
+  //   navlabel: true,
+  //   subheader: "Keuangan",
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: "Tagihan",
+  //   icon: IconReceipt,
+  //   href: "/rt/bills",
+  //   children: [
+  //     {
+  //       id: uniqueId(),
+  //       title: "IPL",
+  //       href: "/rt/bills/ipl",
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: "Kas",
+  //       href: "/rt/bills/cash",
+  //     },
+  //     {
+  //       id: uniqueId(),
+  //       title: "PKK",
+  //       href: "/rt/bills/pkk",
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: uniqueId(),
+  //   title: "Transaksi",
+  //   icon: IconCash,
+  //   href: "/rt/transactions",
+  // },
 ];
 
 // Default export untuk kompatibilitas
