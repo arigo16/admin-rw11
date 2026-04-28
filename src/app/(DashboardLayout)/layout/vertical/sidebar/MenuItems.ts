@@ -27,6 +27,8 @@ import {
   IconHome,
   IconReceipt,
   IconCash,
+  IconWallet,
+  IconCoins,
 } from "@tabler/icons-react";
 
 // Menu untuk RW (menu yang sudah ada)
@@ -60,9 +62,21 @@ export const RwMenuItems: MenuitemsType[] = [
   },
   {
     id: uniqueId(),
-    title: "Inventaris",
+    title: "Assets",
     icon: IconPackage,
     href: "/assets",
+  },
+  {
+    id: uniqueId(),
+    title: "Kelola Kas",
+    icon: IconWallet,
+    href: "/keuangan",
+  },
+  {
+    id: uniqueId(),
+    title: "Iuran Rutin",
+    icon: IconCoins,
+    href: "/iuran-rutin",
   },
 
   {

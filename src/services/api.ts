@@ -140,6 +140,131 @@ export interface Dokumen {
   } | null;
 }
 
+// Transaction Type
+export interface TransactionType {
+  id: number;
+  name: string;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Transaction
+export interface Transaction {
+  id: number;
+  id_settlement: string;
+  mutation: 'IN' | 'OUT';
+  type_id: number;
+  amount: string;
+  balance_before: string;
+  balance_after: string;
+  transaction_date: string;
+  description: string | null;
+  attachment: string | null;
+  created_by: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  type: TransactionType;
+  creator: {
+    id: number;
+    name: string;
+  };
+}
+
+// Transaction Balance
+export interface TransactionBalance {
+  balance: number;
+  formatted_balance: string;
+  last_transaction: {
+    id: number;
+    id_settlement: string;
+    mutation: 'IN' | 'OUT';
+    amount: string;
+    transaction_date: string;
+  } | null;
+  last_updated: string | null;
+}
+
+// Transaction Summary
+export interface TransactionSummary {
+  total_in: number;
+  total_out: number;
+  count_in: number;
+  count_out: number;
+  net: number;
+  current_balance: number;
+  formatted: {
+    total_in: string;
+    total_out: string;
+    net: string;
+    current_balance: string;
+  };
+}
+
+// Contributor (Iuran Rutin)
+export interface Contributor {
+  id: number;
+  code: string;
+  name: string;
+  type: 'RT' | 'RUKO' | 'LAINNYA';
+  amount: string;
+  is_active: boolean;
+  start_month: number | null;
+  start_year: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  bills?: ContributorBill[];
+}
+
+// Contributor Bill (Tagihan Iuran)
+export interface ContributorBill {
+  id: number;
+  contributor_id: number;
+  year_bill: number;
+  month_bill: number;
+  amount: string;
+  status: 'PAID' | 'UNPAID';
+  transaction_id: number | null;
+  paid_at: string | null;
+  paid_by: number | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  contributor?: Contributor;
+  transaction?: Transaction;
+  paid_by_user?: {
+    id: number;
+    name: string;
+  } | null;
+}
+
+// Bills Summary
+export interface BillsSummaryMonth {
+  month: number;
+  month_name: string;
+  total_bills: number;
+  paid_count: number;
+  unpaid_count: number;
+  total_amount: number;
+  paid_amount: number;
+  unpaid_amount: number;
+}
+
+export interface BillsSummary {
+  year: number;
+  months: BillsSummaryMonth[];
+  totals: {
+    total_bills: number;
+    paid_count: number;
+    unpaid_count: number;
+    total_amount: number;
+    paid_amount: number;
+    unpaid_amount: number;
+  };
+}
+
 // ============ RT Types ============
 
 // Religion enum
@@ -600,6 +725,110 @@ export const dokumenAPI = {
     }),
   delete: (id: number) => api.delete<ApiResponse<null>>(`/dokumen/${id}`),
   togglePublic: (id: number) => api.post<ApiResponse<Dokumen>>(`/dokumen/${id}/toggle-public`),
+};
+
+// ============ Transactions API ============
+
+export const transactionsAPI = {
+  // Transactions
+  getAll: (params?: {
+    page?: number;
+    per_page?: number;
+    mutation?: 'IN' | 'OUT';
+    type_id?: number;
+    start_date?: string;
+    end_date?: string;
+    month?: number;
+    year?: number;
+    search?: string;
+  }) => api.get<PaginatedResponse<Transaction>>('/transactions', { params }),
+  getById: (id: number) => api.get<ApiResponse<Transaction>>(`/transactions/${id}`),
+  create: (data: FormData) =>
+    api.post<ApiResponse<Transaction>>('/transactions', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  update: (id: number, data: FormData) =>
+    api.post<ApiResponse<Transaction>>(`/transactions/${id}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  delete: (id: number) => api.delete<ApiResponse<null>>(`/transactions/${id}`),
+
+  // Balance & Summary
+  getBalance: () => api.get<ApiResponse<TransactionBalance>>('/transactions/balance'),
+  getSummary: (params?: { month?: number; year?: number }) =>
+    api.get<ApiResponse<TransactionSummary>>('/transactions/summary', { params }),
+
+  // Transaction Types
+  getTypes: (params?: { active_only?: boolean }) =>
+    api.get<ApiResponse<TransactionType[]>>('/transaction-types', { params }),
+  createType: (data: { name: string }) =>
+    api.post<ApiResponse<TransactionType>>('/transaction-types', data),
+  updateType: (id: number, data: { name?: string; is_active?: boolean }) =>
+    api.put<ApiResponse<TransactionType>>(`/transaction-types/${id}`, data),
+  deleteType: (id: number) => api.delete<ApiResponse<null>>(`/transaction-types/${id}`),
+};
+
+// ============ Contributors API (Iuran Rutin) ============
+
+export const contributorsAPI = {
+  getAll: (params?: {
+    page?: number;
+    per_page?: number;
+    type?: 'RT' | 'RUKO' | 'LAINNYA';
+    is_active?: boolean;
+    search?: string;
+    all?: boolean;
+  }) => api.get<PaginatedResponse<Contributor>>('/contributors', { params }),
+  getById: (id: number) => api.get<ApiResponse<Contributor>>(`/contributors/${id}`),
+  create: (data: {
+    code: string;
+    name: string;
+    type: 'RT' | 'RUKO' | 'LAINNYA';
+    amount: number;
+    is_active?: boolean;
+    start_month?: number;
+    start_year?: number;
+    notes?: string;
+  }) => api.post<ApiResponse<Contributor>>('/contributors', data),
+  update: (id: number, data: Partial<{
+    code: string;
+    name: string;
+    type: 'RT' | 'RUKO' | 'LAINNYA';
+    amount: number;
+    is_active: boolean;
+    start_month: number;
+    start_year: number;
+    notes: string;
+  }>) => api.put<ApiResponse<Contributor>>(`/contributors/${id}`, data),
+  delete: (id: number) => api.delete<ApiResponse<null>>(`/contributors/${id}`),
+};
+
+// ============ Contributor Bills API (Tagihan Iuran) ============
+
+export const contributorBillsAPI = {
+  getAll: (params?: {
+    page?: number;
+    per_page?: number;
+    contributor_id?: number;
+    status?: 'PAID' | 'UNPAID';
+    year?: number;
+    month?: number;
+    type?: 'RT' | 'RUKO' | 'LAINNYA';
+  }) => api.get<PaginatedResponse<ContributorBill>>('/contributor-bills', { params }),
+  getById: (id: number) => api.get<ApiResponse<ContributorBill>>(`/contributor-bills/${id}`),
+  generate: (data: {
+    year: number;
+    month: number;
+    contributor_ids?: number[];
+  }) => api.post<ApiResponse<{ period: string; created: number; skipped: number }>>('/contributor-bills/generate', data),
+  pay: (id: number, data: FormData) =>
+    api.post<ApiResponse<ContributorBill>>(`/contributor-bills/${id}/pay`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  unpay: (id: number) => api.post<ApiResponse<ContributorBill>>(`/contributor-bills/${id}/unpay`),
+  delete: (id: number) => api.delete<ApiResponse<null>>(`/contributor-bills/${id}`),
+  getSummary: (params?: { year?: number }) =>
+    api.get<ApiResponse<BillsSummary>>('/contributor-bills/summary', { params }),
 };
 
 // ============ RT API ============

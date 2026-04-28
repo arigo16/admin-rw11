@@ -21,6 +21,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import MenuItem from '@mui/material/MenuItem';
 import Skeleton from '@mui/material/Skeleton';
+import CircularProgress from '@mui/material/CircularProgress';
 import PageContainer from '@/app/components/container/PageContainer';
 import { useSnackbar } from '@/app/context/snackbarContext';
 import CustomTextField from '@/app/components/forms/theme-elements/CustomTextField';
@@ -95,6 +96,7 @@ export default function AssetsPage() {
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Menu state
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -131,7 +133,7 @@ export default function AssetsPage() {
         setMeta(response.data.meta);
       }
     } catch (err) {
-      showError('Gagal memuat data inventaris');
+      showError('Gagal memuat data assets');
     } finally {
       setIsLoading(false);
     }
@@ -211,10 +213,10 @@ export default function AssetsPage() {
       if (editingId) {
         submitFormData.append('_method', 'PUT');
         await assetsAPI.update(editingId, submitFormData);
-        showSuccess('Inventaris berhasil diperbarui');
+        showSuccess('Asset berhasil diperbarui');
       } else {
         await assetsAPI.create(submitFormData);
-        showSuccess('Inventaris berhasil ditambahkan');
+        showSuccess('Asset berhasil ditambahkan');
       }
       handleCloseDialog();
       fetchAssets();
@@ -227,14 +229,17 @@ export default function AssetsPage() {
 
   const handleDelete = async () => {
     if (!deletingId) return;
+    setIsDeleting(true);
     try {
       await assetsAPI.delete(deletingId);
-      showSuccess('Inventaris berhasil dihapus');
+      showSuccess('Asset berhasil dihapus');
       setOpenDeleteDialog(false);
       setDeletingId(null);
       fetchAssets();
     } catch (err: any) {
       showError(err.response?.data?.message || 'Gagal menghapus data');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -250,20 +255,20 @@ export default function AssetsPage() {
   };
 
   return (
-    <PageContainer title="Inventaris" description="Kelola data inventaris RW">
+    <PageContainer title="Assets" description="Kelola data assets RW">
       <Box mt={3}>
         <Card>
           <CardContent>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
               <Typography variant="h5" fontWeight={600}>
-                Data Inventaris
+                Data Assets
               </Typography>
               <Button
                 variant="contained"
                 startIcon={<IconPlus size={18} />}
                 onClick={() => handleOpenDialog()}
               >
-                Tambah Inventaris
+                Tambah Asset
               </Button>
             </Box>
 
@@ -284,7 +289,7 @@ export default function AssetsPage() {
               >
                 <Box display="flex" flexDirection="column" gap={2}>
                   <CustomTextField
-                    placeholder="Cari nama inventaris..."
+                    placeholder="Cari nama asset..."
                     value={search}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearchChange(e.target.value)}
                     sx={{ width: '100%' }}
@@ -348,7 +353,7 @@ export default function AssetsPage() {
                   ) : assets.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} align="center">
-                        Belum ada data inventaris
+                        Belum ada data assets
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -413,14 +418,23 @@ export default function AssetsPage() {
         </Card>
 
         {/* Add/Edit Dialog */}
-        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-          <DialogTitle>{editingId ? 'Edit Inventaris' : 'Tambah Inventaris'}</DialogTitle>
+        <Dialog
+          open={openDialog}
+          onClose={(_, reason) => {
+            if (reason !== 'backdropClick' && reason !== 'escapeKeyDown') {
+              handleCloseDialog();
+            }
+          }}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle>{editingId ? 'Edit Asset' : 'Tambah Asset'}</DialogTitle>
           <DialogContent>
             <Box sx={{ pt: 1 }}>
               <CustomFormLabel htmlFor="nama">Nama</CustomFormLabel>
               <CustomTextField
                 id="nama"
-                placeholder="Masukkan nama inventaris"
+                placeholder="Masukkan nama asset"
                 fullWidth
                 value={formData.nama}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, nama: e.target.value })}
@@ -544,7 +558,12 @@ export default function AssetsPage() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseDialog} disabled={isSubmitting}>Batal</Button>
-            <Button variant="contained" onClick={handleSubmit} disabled={isSubmitting}>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : null}
+            >
               {isSubmitting ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </DialogActions>
@@ -582,15 +601,28 @@ export default function AssetsPage() {
         </Menu>
 
         {/* Delete Confirmation Dialog */}
-        <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <Dialog
+          open={openDeleteDialog}
+          onClose={(_, reason) => {
+            if (reason !== 'backdropClick' && reason !== 'escapeKeyDown' && !isDeleting) {
+              setOpenDeleteDialog(false);
+            }
+          }}
+        >
           <DialogTitle>Konfirmasi Hapus</DialogTitle>
           <DialogContent>
-            <Typography>Apakah Anda yakin ingin menghapus inventaris ini?</Typography>
+            <Typography>Apakah Anda yakin ingin menghapus asset ini?</Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenDeleteDialog(false)}>Batal</Button>
-            <Button variant="contained" color="error" onClick={handleDelete}>
-              Hapus
+            <Button onClick={() => setOpenDeleteDialog(false)} disabled={isDeleting}>Batal</Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              startIcon={isDeleting ? <CircularProgress size={16} color="inherit" /> : null}
+            >
+              {isDeleting ? 'Menghapus...' : 'Hapus'}
             </Button>
           </DialogActions>
         </Dialog>

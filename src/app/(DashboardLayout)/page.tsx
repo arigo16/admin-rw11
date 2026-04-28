@@ -162,11 +162,11 @@ export default function Dashboard() {
               <Skeleton variant="rounded" height={120} />
             ) : (
               <StatCard
-                title="Total Inventaris"
+                title="Total Assets"
                 value={stats.assets}
                 icon={<IconPackage size={28} color="white" />}
                 color="secondary"
-                subtitle="Aset & inventaris RW"
+                subtitle="Aset RW"
               />
             )}
           </Grid>
