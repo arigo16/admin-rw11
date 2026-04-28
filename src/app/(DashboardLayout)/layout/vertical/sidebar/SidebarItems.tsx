@@ -1,12 +1,9 @@
 'use client';
 import { RwMenuItems, RtMenuItems } from './MenuItems';
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import NavItem from './NavItem';
 import NavCollapse from './NavCollapse';
@@ -14,38 +11,20 @@ import NavGroup from './NavGroup/NavGroup';
 import { useContext } from 'react';
 import { useOrg } from '@/app/context/orgContext';
 import { CustomizerContext } from '@/app/context/customizerContext';
-import { IconBuilding, IconHome2 } from '@tabler/icons-react';
-
-// Generate RT options (1-15)
-const rtOptions = Array.from({ length: 15 }, (_, i) => i + 1);
+import { IconBuilding } from '@tabler/icons-react';
 
 const SidebarItems = () => {
   const pathname = usePathname();
-  const router = useRouter();
   const pathDirect = pathname;
   const pathWithoutLastPart = pathname.slice(0, pathname.lastIndexOf('/'));
   const { isSidebarHover, isCollapse, isMobileSidebar, setIsMobileSidebar } = useContext(CustomizerContext);
-  const { orgType, rtId, setOrg } = useOrg();
+  const { orgType } = useOrg();
 
   const lgUp = useMediaQuery((theme: any) => theme.breakpoints.up('lg'));
   const hideMenu: any = lgUp ? isCollapse == "mini-sidebar" && !isSidebarHover : '';
 
   // Select menu based on org type
   const menuItems = orgType === 'rw' ? RwMenuItems : RtMenuItems;
-
-  // Handle org change
-  const handleOrgChange = (value: string) => {
-    if (value === 'rw') {
-      setOrg('rw');
-      router.push('/');
-    } else {
-      const rtNumber = parseInt(value.replace('rt-', ''));
-      setOrg('rt', rtNumber);
-      router.push('/rt/dashboard');
-    }
-  };
-
-  const currentValue = orgType === 'rw' ? 'rw' : `rt-${rtId}`;
 
   return (
     <Box sx={{ px: 3 }}>
@@ -55,36 +34,23 @@ const SidebarItems = () => {
           <Typography variant="caption" color="textSecondary" sx={{ mb: 0.5, display: 'block' }}>
             Kelola
           </Typography>
-          <Select
-            value={currentValue}
-            onChange={(e) => handleOrgChange(e.target.value)}
-            fullWidth
-            size="small"
+          {/* Dropdown disabled - fitur switch org belum aktif */}
+          <Box
             sx={{
-              '& .MuiSelect-select': {
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-                py: 1,
-              },
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              py: 1,
+              px: 1.5,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 1,
+              bgcolor: 'action.disabledBackground',
             }}
           >
-            <MenuItem value="rw">
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <IconBuilding size={18} />
-                <span>RW 011</span>
-              </Box>
-            </MenuItem>
-            <Divider sx={{ my: 0.5 }} />
-            {rtOptions.map((rt) => (
-              <MenuItem key={rt} value={`rt-${rt}`}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconHome2 size={18} />
-                  <span>RT {String(rt).padStart(3, '0')}</span>
-                </Box>
-              </MenuItem>
-            ))}
-          </Select>
+            <IconBuilding size={18} />
+            <Typography variant="body2">RW 011</Typography>
+          </Box>
         </Box>
       )}
 
