@@ -29,6 +29,7 @@ import {
   IconCash,
   IconWallet,
   IconCoins,
+  IconUserCog,
 } from "@tabler/icons-react";
 
 // Menu untuk RW (menu yang sudah ada)
@@ -105,6 +106,12 @@ export const RwMenuItems: MenuitemsType[] = [
   {
     navlabel: true,
     subheader: "Pengaturan",
+  },
+  {
+    id: uniqueId(),
+    title: "Users",
+    icon: IconUserCog,
+    href: "/users",
   },
   {
     id: uniqueId(),

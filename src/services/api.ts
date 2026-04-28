@@ -831,6 +831,23 @@ export const contributorBillsAPI = {
     api.get<ApiResponse<BillsSummary>>('/contributor-bills/summary', { params }),
 };
 
+// ============ Users API ============
+
+export const usersAPI = {
+  getAll: (params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    all?: boolean;
+  }) => api.get<PaginatedResponse<User>>('/users', { params }),
+  getById: (id: number) => api.get<ApiResponse<User>>(`/users/${id}`),
+  create: (data: { name: string; email: string; password: string }) =>
+    api.post<ApiResponse<User>>('/users', data),
+  update: (id: number, data: { name?: string; email?: string; password?: string }) =>
+    api.put<ApiResponse<User>>(`/users/${id}`, data),
+  delete: (id: number) => api.delete<ApiResponse<null>>(`/users/${id}`),
+};
+
 // ============ RT API ============
 
 // Factory function to create RT API for a specific RT number
