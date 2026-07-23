@@ -90,7 +90,7 @@ const months = [
   { value: 12, label: 'Desember' },
 ];
 
-const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i + 1);
+const years = Array.from({ length: 5 }, (_, i) => 2026 + i);
 
 export default function IuranRutinPage() {
   const { showError, showSuccess } = useSnackbar();
