@@ -209,12 +209,14 @@ export interface Contributor {
   name: string;
   type: 'RT' | 'RUKO' | 'LAINNYA';
   amount: string;
+  transaction_type_id: number | null;
   is_active: boolean;
   start_month: number | null;
   start_year: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
+  transaction_type?: TransactionType;
   bills?: ContributorBill[];
 }
 
@@ -785,6 +787,7 @@ export const contributorsAPI = {
     name: string;
     type: 'RT' | 'RUKO' | 'LAINNYA';
     amount: number;
+    transaction_type_id?: number;
     is_active?: boolean;
     start_month?: number;
     start_year?: number;
@@ -795,6 +798,7 @@ export const contributorsAPI = {
     name: string;
     type: 'RT' | 'RUKO' | 'LAINNYA';
     amount: number;
+    transaction_type_id: number;
     is_active: boolean;
     start_month: number;
     start_year: number;

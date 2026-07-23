@@ -53,9 +53,11 @@ import {
 import {
   contributorsAPI,
   contributorBillsAPI,
+  transactionsAPI,
   Contributor,
   ContributorBill,
   BillsSummary,
+  TransactionType,
 } from '@/services/api';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -122,6 +124,9 @@ export default function IuranRutinPage() {
   const [contributorsRowsPerPage, setContributorsRowsPerPage] = useState(10);
   const [contributorSearch, setContributorSearch] = useState('');
 
+  // Transaction types state
+  const [transactionTypes, setTransactionTypes] = useState<TransactionType[]>([]);
+
   // Contributor dialog state
   const [openContributorDialog, setOpenContributorDialog] = useState(false);
   const [editingContributorId, setEditingContributorId] = useState<number | null>(null);
@@ -131,6 +136,7 @@ export default function IuranRutinPage() {
     name: '',
     type: 'RT' as 'RT' | 'RUKO' | 'LAINNYA',
     amount: '',
+    transaction_type_id: 1,
     is_active: true,
     start_month: new Date().getMonth() + 1,
     start_year: new Date().getFullYear(),
@@ -169,6 +175,7 @@ export default function IuranRutinPage() {
   useEffect(() => {
     fetchAllContributors();
     fetchSummary();
+    fetchTransactionTypes();
   }, []);
 
   useEffect(() => {
@@ -189,6 +196,15 @@ export default function IuranRutinPage() {
       setAllContributors(response.data.data || []);
     } catch (err) {
       console.error('Error fetching all contributors:', err);
+    }
+  };
+
+  const fetchTransactionTypes = async () => {
+    try {
+      const response = await transactionsAPI.getTypes({ active_only: true });
+      setTransactionTypes(response.data.data || []);
+    } catch (err) {
+      console.error('Error fetching transaction types:', err);
     }
   };
 
@@ -265,6 +281,7 @@ export default function IuranRutinPage() {
         name: contributor.name,
         type: contributor.type,
         amount: contributor.amount.replace('.00', ''),
+        transaction_type_id: contributor.transaction_type_id || 1,
         is_active: contributor.is_active,
         start_month: contributor.start_month || new Date().getMonth() + 1,
         start_year: contributor.start_year || new Date().getFullYear(),
@@ -277,6 +294,7 @@ export default function IuranRutinPage() {
         name: '',
         type: 'RT',
         amount: '',
+        transaction_type_id: 1,
         is_active: true,
         start_month: new Date().getMonth() + 1,
         start_year: new Date().getFullYear(),
@@ -304,6 +322,7 @@ export default function IuranRutinPage() {
         name: contributorForm.name,
         type: contributorForm.type,
         amount: parseFloat(contributorForm.amount.replace(/\./g, '')),
+        transaction_type_id: contributorForm.transaction_type_id,
         is_active: contributorForm.is_active,
         start_month: contributorForm.start_month,
         start_year: contributorForm.start_year,
@@ -852,6 +871,7 @@ export default function IuranRutinPage() {
                         <TableCell>Kode</TableCell>
                         <TableCell>Nama</TableCell>
                         <TableCell>Tipe</TableCell>
+                        <TableCell>Tipe Transaksi</TableCell>
                         <TableCell align="right">Iuran/Bulan</TableCell>
                         <TableCell>Mulai Berlaku</TableCell>
                         <TableCell>Status</TableCell>
@@ -862,7 +882,7 @@ export default function IuranRutinPage() {
                       {contributorsLoading ? (
                         [...Array(5)].map((_, i) => (
                           <TableRow key={i}>
-                            {[...Array(7)].map((_, j) => (
+                            {[...Array(8)].map((_, j) => (
                               <TableCell key={j}>
                                 <Skeleton />
                               </TableCell>
@@ -871,7 +891,7 @@ export default function IuranRutinPage() {
                         ))
                       ) : contributors.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={7} align="center">
+                          <TableCell colSpan={8} align="center">
                             Belum ada data contributor
                           </TableCell>
                         </TableRow>
@@ -888,6 +908,14 @@ export default function IuranRutinPage() {
                               <Chip
                                 label={contributor.type}
                                 size="small"
+                                variant="outlined"
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={contributor.transaction_type?.name || '-'}
+                                size="small"
+                                color="info"
                                 variant="outlined"
                               />
                             </TableCell>
@@ -1021,6 +1049,19 @@ export default function IuranRutinPage() {
                 {contributorTypes.map((t) => (
                   <MenuItem key={t.value} value={t.value}>
                     {t.label}
+                  </MenuItem>
+                ))}
+              </CustomSelect>
+
+              <CustomFormLabel>Tipe Transaksi</CustomFormLabel>
+              <CustomSelect
+                value={contributorForm.transaction_type_id}
+                onChange={(e: any) => setContributorForm({ ...contributorForm, transaction_type_id: e.target.value })}
+                fullWidth
+              >
+                {transactionTypes.map((t) => (
+                  <MenuItem key={t.id} value={t.id}>
+                    {t.name}
                   </MenuItem>
                 ))}
               </CustomSelect>
